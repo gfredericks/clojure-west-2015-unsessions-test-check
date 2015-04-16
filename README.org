@@ -1,0 +1,20 @@
+* Clojure/West 2015 test.check unsession
+
+  Possible topics.
+
+** Basic Intro
+
+** Internals
+
+** Auxiliary Libs
+   - test.chuck
+   - [[https://github.com/czan/stateful-check][stateful-check]]
+   - [[https://github.com/jstepien/states][states]]
+
+** ClojureScript
+
+** Future Design / Improvements
+*** Numerics
+*** Testing generators
+    How to assert that a generator "probably" generates a particular
+    kind of thing?
