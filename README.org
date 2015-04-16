@@ -3,9 +3,21 @@
   Possible topics.
 
 ** Basic Intro
-
+   The test.check README probably has a lot of material for this.
+*** Basic Generators
+**** Scalars
+**** Collections
+*** Generator Combinators
+**** fmap
+**** bind
+**** such-that
+*** Properties
 ** Internals
-
+*** Generators & Shrink Trees
+    Monads monads monads.
+*** Properties
+    They're just generators.
+*** The =quick-check= algorithm
 ** Auxiliary Libs
    - test.chuck
    - [[https://github.com/czan/stateful-check][stateful-check]]
@@ -15,6 +27,31 @@
 
 ** Future Design / Improvements
 *** Numerics
+    The big problem currently is with the distribution of the numeric
+    generators. E.g., gen/int probably only generates numbers between
+    -200 and 200, which is definitely not sufficient for all
+    applications.
+
+    How do we create a set of generators that can cover most/all
+    common distributional needs but not suffer from some sort of
+    overwhelming combinatorial API complexity problem?
+
+    Example distributions:
+    - ALL possible doubles
+      - Shrinking towards what?
+    - Some other natural distribution of doubles?
+    - ALL possible longs
+    - Some particular range of ratios?
+      - Maybe an upper bound on the absolute value of the numerator
+        and denominator?
+    - Big decimals? Maybe with a specific precision and upper bound
+      on absolute value?
+    - Is there a use for generating unbounded bigints and ratios?
+      - How would the user control the distribution?
+      - For that matter what would this even mean w.r.t. the 'size'
+        parameter? Should we have a pattern for things that are
+        unbounded regardless of size, but where size determines the
+        "expected" size of the thing?
 *** Testing generators
     How to assert that a generator "probably" generates a particular
     kind of thing?
