@@ -13,6 +13,19 @@
 **** such-that
 *** Properties
 ** High Level sales pitch, experience report
+   - General
+     - Test lots of edge cases at once
+     - Drawbacks
+       - Big investment
+       - Harder to understand your tests
+   - Large-scale
+     - Value of modeling your system
+       - Exposes assumptions
+     - Eventual support for testing concurrent processes?
+     - Drawbacks
+       - Testing large-scale things can be very slow feedback
+         - Particularly w.r.t. shrinking
+       - Complex generators don't always shrink very well
 ** Internals
 *** Generators & Shrink Trees
     Monads monads monads.
@@ -54,6 +67,7 @@
         parameter? Should we have a pattern for things that are
         unbounded regardless of size, but where size determines the
         "expected" size of the thing?
+*** Shrinking
 *** Testing generators
     How to assert that a generator "probably" generates a particular
     kind of thing?
