@@ -19,9 +19,10 @@
     They're just generators.
 *** The =quick-check= algorithm
 ** Auxiliary Libs
-   - test.chuck
+   - [[https://github.com/guilespi/fsm-test-check][fsm-test-check]]
    - [[https://github.com/czan/stateful-check][stateful-check]]
    - [[https://github.com/jstepien/states][states]]
+   - [[https://github.com/gfredericks/test.chuck][test.chuck]]
 
 ** ClojureScript
 
