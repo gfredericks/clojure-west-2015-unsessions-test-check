@@ -39,7 +39,7 @@
    - [[https://github.com/gfredericks/test.chuck][test.chuck]]
 
 ** ClojureScript
-
+   I don't actually know anything about this.
 ** Future Design / Improvements
 *** Numerics
     The big problem currently is with the distribution of the numeric
@@ -68,6 +68,10 @@
         unbounded regardless of size, but where size determines the
         "expected" size of the thing?
 *** Shrinking
+    One problem is that anything using bind probably does not shrink
+    optimally.
 *** Testing generators
     How to assert that a generator "probably" generates a particular
     kind of thing?
+
+    Is this a replacement for regression tests?

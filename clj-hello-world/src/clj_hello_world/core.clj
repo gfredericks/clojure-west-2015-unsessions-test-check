@@ -1,7 +1,9 @@
 (ns clj-hello-world.core
   (:require [clojure.test.check :as t.c]
+            [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.generators :as gen]
-            [clojure.test.check.properties :as prop]))
+            [clojure.test.check.properties :as prop]
+            [com.gfredericks.test.chuck.generators :as gen']))
 
 ;;
 ;; Scalars
@@ -188,3 +190,104 @@
    {:age 7, :good? true, :name "c2p8SFtEb", :owner "o648A", :type :dog}
    {:age 3, :good? true, :name "UTo28b37", :owner "6", :type :dog}
    {:age 6, :good? false, :name "1vKg", :owner "8N", :type :dog}]])
+
+
+;;
+;; Properties
+;;
+
+(def prop-sorted-first-less-than-last
+  (prop/for-all [v (gen/not-empty (gen/vector gen/int))]
+    (let [s (sort v)]
+      (< (first s) (last s)))))
+
+(t.c/quick-check 100 prop-sorted-first-less-than-last)
+=>
+{:fail [[-2]],
+ :failing-size 0,
+ :num-tests 1,
+ :result false,
+ :seed 1429583361932,
+ :shrunk {:depth 1, :result false, :smallest [[0]], :total-nodes-visited 3}}
+
+;;
+;; defspec for clojure.test integration
+;;
+
+(defspec prop-sorted-first-less-than-last 100
+  (prop/for-all [v (gen/not-empty (gen/vector gen/int))]
+    (let [s (sort v)]
+      (< (first s) (last s)))))
+
+;;
+;; test.chuck's for macro
+;;
+
+(gen/sample
+ (gen'/for [len gen/nat
+            bools (gen/vector gen/boolean len)]
+   [len bools]))
+=>
+([0 []]
+ [1 [true]]
+ [0 []]
+ [3 [true true true]]
+ [3 [false false true]]
+ [3 [false true true]]
+ [1 [false]]
+ [1 [true]]
+ [2 [false false]]
+ [4 [true false false false]])
+
+(gen/sample
+ (gen'/for [:parallel [people (gen/not-empty
+                               (gen/list (gen/hash-map :type (gen/return :person)
+                                                       :name gen/string-alphanumeric
+                                                       :age gen/nat)))
+                       dogs (gen/list (gen/hash-map :type (gen/return :dog)
+                                                    :name gen/string-alphanumeric
+                                                    :age gen/nat
+                                                    :good? gen/boolean))]
+            :let [people-names (map :name people)]
+            dog-owners (gen/vector (gen/elements people-names) (count dogs))]
+   [people (map #(assoc %1 :owner %2) dogs dog-owners)]))
+=>
+([({:age 3, :name "NA", :type :person} {:age 0, :name "12", :type :person}) ()]
+ [({:age 0, :name "c", :type :person} {:age 3, :name "13", :type :person}) ()]
+ [({:age 0, :name "X", :type :person} {:age 1, :name "1Y", :type :person})
+  ({:age 1, :good? true, :name "0J", :owner "1Y", :type :dog})]
+ [({:age 3, :name "q", :type :person} {:age 3, :name "", :type :person})
+  ({:age 2, :good? false, :name "t", :owner "q", :type :dog}
+   {:age 3, :good? true, :name "F1", :owner "", :type :dog}
+   {:age 3, :good? false, :name "t", :owner "q", :type :dog})]
+ [({:age 2, :name "5hj", :type :person}
+   {:age 0, :name "", :type :person}
+   {:age 3, :name "", :type :person})
+  ({:age 3, :good? true, :name "O", :owner "", :type :dog}
+   {:age 3, :good? false, :name "87T", :owner "", :type :dog}
+   {:age 2, :good? true, :name "Y", :owner "5hj", :type :dog}
+   {:age 0, :good? true, :name "Rs1", :owner "", :type :dog})]
+ [({:age 0, :name "86", :type :person} {:age 3, :name "", :type :person})
+  ({:age 5, :good? true, :name "", :owner "", :type :dog}
+   {:age 2, :good? false, :name "", :owner "86", :type :dog}
+   {:age 4, :good? true, :name "9p20", :owner "", :type :dog}
+   {:age 1, :good? false, :name "s", :owner "", :type :dog}
+   {:age 1, :good? true, :name "GD", :owner "86", :type :dog})]
+ [({:age 3, :name "SazK", :type :person})
+  ({:age 2, :good? true, :name "04f4", :owner "SazK", :type :dog}
+   {:age 4, :good? true, :name "", :owner "SazK", :type :dog}
+   {:age 4, :good? true, :name "0a2", :owner "SazK", :type :dog}
+   {:age 4, :good? false, :name "D", :owner "SazK", :type :dog}
+   {:age 6, :good? true, :name "tQrW", :owner "SazK", :type :dog}
+   {:age 3, :good? true, :name "98", :owner "SazK", :type :dog})]
+ [({:age 4, :name "uJi", :type :person}
+   {:age 1, :name "G6oD7h", :type :person}
+   {:age 7, :name "xIZ", :type :person}
+   {:age 1, :name "A3iv", :type :person})
+  ({:age 5, :good? false, :name "", :owner "G6oD7h", :type :dog})]
+ [({:age 5, :name "n", :type :person}
+   {:age 2, :name "I", :type :person}
+   {:age 1, :name "a9M863", :type :person}
+   {:age 8, :name "v6lb67", :type :person})
+  ({:age 2, :good? false, :name "5177", :owner "v6lb67", :type :dog})]
+ [({:age 0, :name "", :type :person} {:age 2, :name "7", :type :person}) ()])
