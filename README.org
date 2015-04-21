@@ -2,16 +2,6 @@
 
   Possible topics.
 
-** Basic Intro
-   The test.check README probably has a lot of material for this.
-*** Basic Generators
-**** Scalars
-**** Collections
-*** Generator Combinators
-**** fmap
-**** bind
-**** such-that
-*** Properties
 ** High Level sales pitch, experience report
    - General
      - Test lots of edge cases at once
@@ -26,6 +16,16 @@
        - Testing large-scale things can be very slow feedback
          - Particularly w.r.t. shrinking
        - Complex generators don't always shrink very well
+** Basic Intro
+   The test.check README probably has a lot of material for this.
+*** Basic Generators
+**** Scalars
+**** Collections
+*** Generator Combinators
+**** fmap
+**** bind
+**** such-that
+*** Properties
 ** Internals
 *** Generators & Shrink Trees
     Monads monads monads.

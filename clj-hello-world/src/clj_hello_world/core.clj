@@ -125,6 +125,23 @@
  ("" "7M0d" "9Y3hD" "J" "MLz822W60" "Y21qn9tz8" "e7s076u" "uEPrdCnpg"))
 
 (gen/sample
+ (gen/such-that even? gen/nat)) => (0 0 2 6 0 2 8 2 2 8)
+
+(gen/sample
+ (gen/tuple gen/boolean gen/nat))
+=>
+([true 0]
+ [true 1]
+ [false 1]
+ [true 2]
+ [true 1]
+ [false 2]
+ [false 5]
+ [true 3]
+ [true 1]
+ [false 8])
+
+(gen/sample
  (gen/bind (gen/tuple (gen/not-empty (gen/list (gen/hash-map :type (gen/return :person)
                                                              :name gen/string-alphanumeric
                                                              :age gen/nat)))
@@ -239,55 +256,95 @@
  [2 [false false]]
  [4 [true false false false]])
 
+(def gen-person
+  (gen/hash-map :type (gen/return :person)
+                :name (gen'/string-from-regex #"Bob|Chuck|Garr?y")
+                :age gen/nat))
+
+(def gen-dog
+  (gen/hash-map :type (gen/return :dog)
+                :name gen/string-alphanumeric
+                :age gen/nat
+                :good? gen/boolean))
+
 (gen/sample
- (gen'/for [:parallel [people (gen/not-empty
-                               (gen/list (gen/hash-map :type (gen/return :person)
-                                                       :name gen/string-alphanumeric
-                                                       :age gen/nat)))
-                       dogs (gen/list (gen/hash-map :type (gen/return :dog)
-                                                    :name gen/string-alphanumeric
-                                                    :age gen/nat
-                                                    :good? gen/boolean))]
+ (gen'/for [:parallel [people (gen/not-empty (gen/list gen-person))
+                       dogs (gen/list gen-dog)]
             :let [people-names (map :name people)]
             dog-owners (gen/vector (gen/elements people-names) (count dogs))]
    [people (map #(assoc %1 :owner %2) dogs dog-owners)]))
+
 =>
-([({:age 3, :name "NA", :type :person} {:age 0, :name "12", :type :person}) ()]
- [({:age 0, :name "c", :type :person} {:age 3, :name "13", :type :person}) ()]
- [({:age 0, :name "X", :type :person} {:age 1, :name "1Y", :type :person})
-  ({:age 1, :good? true, :name "0J", :owner "1Y", :type :dog})]
- [({:age 3, :name "q", :type :person} {:age 3, :name "", :type :person})
-  ({:age 2, :good? false, :name "t", :owner "q", :type :dog}
-   {:age 3, :good? true, :name "F1", :owner "", :type :dog}
-   {:age 3, :good? false, :name "t", :owner "q", :type :dog})]
- [({:age 2, :name "5hj", :type :person}
-   {:age 0, :name "", :type :person}
-   {:age 3, :name "", :type :person})
-  ({:age 3, :good? true, :name "O", :owner "", :type :dog}
-   {:age 3, :good? false, :name "87T", :owner "", :type :dog}
-   {:age 2, :good? true, :name "Y", :owner "5hj", :type :dog}
-   {:age 0, :good? true, :name "Rs1", :owner "", :type :dog})]
- [({:age 0, :name "86", :type :person} {:age 3, :name "", :type :person})
-  ({:age 5, :good? true, :name "", :owner "", :type :dog}
-   {:age 2, :good? false, :name "", :owner "86", :type :dog}
-   {:age 4, :good? true, :name "9p20", :owner "", :type :dog}
-   {:age 1, :good? false, :name "s", :owner "", :type :dog}
-   {:age 1, :good? true, :name "GD", :owner "86", :type :dog})]
- [({:age 3, :name "SazK", :type :person})
-  ({:age 2, :good? true, :name "04f4", :owner "SazK", :type :dog}
-   {:age 4, :good? true, :name "", :owner "SazK", :type :dog}
-   {:age 4, :good? true, :name "0a2", :owner "SazK", :type :dog}
-   {:age 4, :good? false, :name "D", :owner "SazK", :type :dog}
-   {:age 6, :good? true, :name "tQrW", :owner "SazK", :type :dog}
-   {:age 3, :good? true, :name "98", :owner "SazK", :type :dog})]
- [({:age 4, :name "uJi", :type :person}
-   {:age 1, :name "G6oD7h", :type :person}
-   {:age 7, :name "xIZ", :type :person}
-   {:age 1, :name "A3iv", :type :person})
-  ({:age 5, :good? false, :name "", :owner "G6oD7h", :type :dog})]
- [({:age 5, :name "n", :type :person}
-   {:age 2, :name "I", :type :person}
-   {:age 1, :name "a9M863", :type :person}
-   {:age 8, :name "v6lb67", :type :person})
-  ({:age 2, :good? false, :name "5177", :owner "v6lb67", :type :dog})]
- [({:age 0, :name "", :type :person} {:age 2, :name "7", :type :person}) ()])
+([({:age 1, :name "Chuck", :type :person}) ()]
+ [({:age 1, :name "Chuck", :type :person})
+  ({:age 1, :good? false, :name "x", :owner "Chuck", :type :dog})]
+ [({:age 0, :name "Gary", :type :person}) ()]
+ [({:age 4, :name "Bob", :type :person}
+   {:age 2, :name "Bob", :type :person}
+   {:age 3, :name "Bob", :type :person}
+   {:age 1, :name "Chuck", :type :person})
+  ({:age 1, :good? true, :name "", :owner "Bob", :type :dog}
+   {:age 3, :good? true, :name "D", :owner "Bob", :type :dog}
+   {:age 3, :good? false, :name "", :owner "Bob", :type :dog})]
+ [({:age 1, :name "Bob", :type :person}
+   {:age 5, :name "Gary", :type :person}
+   {:age 3, :name "Gary", :type :person})
+  ({:age 2, :good? false, :name "", :owner "Gary", :type :dog}
+   {:age 1, :good? false, :name "wR", :owner "Gary", :type :dog})]
+ [({:age 2, :name "Chuck", :type :person}
+   {:age 3, :name "Garry", :type :person}
+   {:age 2, :name "Chuck", :type :person})
+  ({:age 3, :good? true, :name "5", :owner "Chuck", :type :dog}
+   {:age 3, :good? true, :name "oz4sE", :owner "Chuck", :type :dog}
+   {:age 3, :good? true, :name "", :owner "Chuck", :type :dog}
+   {:age 4, :good? true, :name "y", :owner "Chuck", :type :dog})]
+ [({:age 2, :name "Chuck", :type :person}
+   {:age 2, :name "Chuck", :type :person}
+   {:age 6, :name "Chuck", :type :person})
+  ({:age 2, :good? true, :name "CDmnv", :owner "Chuck", :type :dog}
+   {:age 2, :good? true, :name "5dx9s4", :owner "Chuck", :type :dog}
+   {:age 2, :good? true, :name "8ny", :owner "Chuck", :type :dog}
+   {:age 3, :good? true, :name "86GY", :owner "Chuck", :type :dog}
+   {:age 1, :good? false, :name "0nqnOc", :owner "Chuck", :type :dog}
+   {:age 2, :good? true, :name "NG", :owner "Chuck", :type :dog})]
+ [({:age 2, :name "Chuck", :type :person}
+   {:age 5, :name "Gary", :type :person}
+   {:age 5, :name "Chuck", :type :person}
+   {:age 0, :name "Garry", :type :person}
+   {:age 4, :name "Bob", :type :person})
+  ()]
+ [({:age 3, :name "Gary", :type :person}
+   {:age 5, :name "Chuck", :type :person}
+   {:age 3, :name "Gary", :type :person})
+  ({:age 7, :good? true, :name "", :owner "Gary", :type :dog}
+   {:age 5, :good? true, :name "Lu0GpxR", :owner "Chuck", :type :dog}
+   {:age 3, :good? true, :name "0VJIuc", :owner "Chuck", :type :dog}
+   {:age 8, :good? true, :name "4znB", :owner "Chuck", :type :dog}
+   {:age 4, :good? false, :name "nn95", :owner "Gary", :type :dog}
+   {:age 4, :good? true, :name "5M", :owner "Gary", :type :dog}
+   {:age 3, :good? false, :name "fHoEp0U", :owner "Chuck", :type :dog}
+   {:age 6, :good? false, :name "Wx", :owner "Chuck", :type :dog})]
+ [({:age 4, :name "Gary", :type :person})
+  ({:age 5, :good? false, :name "h", :owner "Gary", :type :dog}
+   {:age 6, :good? true, :name "0iX08i1", :owner "Gary", :type :dog}
+   {:age 1, :good? false, :name "3", :owner "Gary", :type :dog})])
+
+
+(gen/sample gen/any)
+=>
+({}
+ []
+ []
+ {() {() (), {"" -, u_*.H4.O!-Z/+_B- cwk} ()}}
+ {(-2) [false], {"@D" -I!_*} {}}
+ {(5/4) {:*f:hEFX "", m*-.?+l?.-.i+K-.z_gM*?/_hR :**.a6.zE80rO.U+9?98._/c+84}}
+ {"«³C£ " "c¤-þ¦<"}
+ {}
+ ({[] ((:?HIO-:34+jEQ_:p9r!2jr8I:l_-*Q-_*5:NCP!QYj:k-!Ld3q0:w-2P*9)
+       [c6Ww+5w*.-V+UN_.Z+4-7-.A!+0+8*7/_!!? 1/5])}
+  {() (), ([]) {[6/7 \O] {6/7 :n-1zYv:!a?nW:n1_8RF_M:-Xj:+u+}, [4/3] {}}})
+ {() ()})
+
+
+(set! *print-length* 5)
+(set! *print-level* 3)
